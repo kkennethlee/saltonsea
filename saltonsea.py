@@ -51,12 +51,16 @@ for i in range(0, numYearsInt):
     #tallymarks month
     for j in range(0, 12):
 
-        #conversion into 
-        a = (14 - j + 1)/12
+        #Below calculates for julian day of first day of every month
+        #http://www.cs.utsa.edu/~cs1063/projects/Spring2011/Project1/jdn-explanation.html
+        
+        #value of 'a' needs to be integer. value 1 for Jan, Feb. value 0 for Mar to Dec
+        a = np.floor((14 - j + 1)/12)
         y = year + 4800 - a
         m = j + 1 + 12*a - 3
 
-        JDN = 1 + (153*m + 2)/5 + 265*y + y/4 - y/100 + y/400 -32045
+        #1 because first day of each month
+        JDN = 1 + (153*m + 2)/5 + 365*y + y/4 - y/100 + y/400 -32045
         JD = JDN + (12 - 12)/24 + 0/1440 + 0/86400
 
         if j == 11:
@@ -78,15 +82,17 @@ for i in range(0, numYearsInt):
     julianDayMatrix.append(julianDayRow)
     vaporPressureMatrix.append(vaporPressureRow)
     
+#solar declination on day J
+solarDeclination = 0.4093 *  np.sin((2 * np.pi * np.array(julianDayMatrix)/365) - 1.405)
 
-solarDecline = 0.4093 *  np.sin((2 * np.pi * np.array(julianDayMatrix)/365) - 1.405)
-sunAngle = np.arccos(-1 * np.tan(phi) * np.tan(np.deg2rad(solarDecline)))
+
+sunsetHourAngle = np.arccos(-1 * np.tan(np.deg2rad(phi)) * np.tan(solarDeclination))
 
 #Nt is the maximum number of daylight hours on day t
-Nt = (24*sunAngle)/np.pi
+Nt = (24*sunsetHourAngle)/np.pi
 
-#print(solarDecline)
-#print(sunAngle)
+#print(solarDeclination)
+#print(sunsetHourAngle)
 #print(Nt)
 
 #reset year to 2003
@@ -114,7 +120,7 @@ tEvaporationMatrix /= 304.8 #(ft/month)
 #sum the elements by column to get yearly evaporation
 tEvaporationMatrix = np.sum(tEvaporationMatrix, axis=0)
 
-
+print(tEvaporationMatrix)
 
 #SCENARIO 1##########
 
@@ -139,6 +145,7 @@ xAxisYear = []
 yAxisWaterLevel = []
 yAxisSalinity = []
 
+#known 
 xAxisYear.append(0)
 yAxisWaterLevel.append(waterLevel_i)
 yAxisSalinity.append(salinity_i)
@@ -147,7 +154,7 @@ for i in range(1, numYearsInt + 1):
     #create x-axis
     xAxisYear.append(i)
 
-    #(ft)      =     (ft)     -         (ft)            + (mi^3) /  mi^3      *     (ft)  
+    #(ft)      =     (ft)     -         (ft)            + (mi^3) /  mi^2      *     (ft/mi)  
     waterLevel = waterLevel_i - tEvaporationMatrix[i - 1] + ((inflow/surfaceArea_i) * 5280) #ft
 
     # find surface area at the new water level using the calculated trend equation:
