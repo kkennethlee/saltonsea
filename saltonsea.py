@@ -52,7 +52,7 @@ for i in range(0, numYearsInt):
     for j in range(0, 12):
 
         #conversion into 
-        a = (14 - j + 1)/12
+        a = np.floor((14 - j + 1)/12)
         y = year + 4800 - a
         m = j + 1 + 12*a - 3
 
@@ -133,6 +133,7 @@ saltMassPerYear= 1.73e+16 #total amount of salt in inflow (mg/yr)
 
 waterLevel_i = -235 #initial water level compared to sea level (ft)
 volume_i = 15.93 #initial lake volume (mi^3)
+volume = 15.93
 surfaceArea_i = 357.67 # initial surface area (mi^2)
 
 xAxisYear = []
@@ -147,8 +148,12 @@ for i in range(1, numYearsInt + 1):
     #create x-axis
     xAxisYear.append(i)
 
+    # find new level of water level with inflow factored in
+    # f(x) = 2.8142x - 15.399 at residual of 0.9638
+    #waterLevel_i = 2.8142 * (volume + 0.3943) - 282.44
+
     #(ft)      =     (ft)     -         (ft)            + (mi^3) /  mi^3      *     (ft)  
-    waterLevel = waterLevel_i - tEvaporationMatrix[i - 1] + ((inflow/surfaceArea_i) * 5280) #ft
+    waterLevel = waterLevel_i - tEvaporationMatrix[i - 1] + (inflow / surfaceArea_i * 5380) #ft
 
     # find surface area at the new water level using the calculated trend equation:
     # f(x) = 7.9104x + 222.48 at residual of 0.9763
@@ -190,6 +195,7 @@ yAxis2.plot(xAxisYear, yAxisSalinity, 'r-')
 
 pl.xlabel('Years from 2003')
 
-pl.title('Salton Sea Water Level')
+pl.title('Salton Sea Water Level Elevation and Salinity')
 
 pl.show()
+
