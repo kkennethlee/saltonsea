@@ -51,6 +51,7 @@ for i in range(0, numYearsInt):
     #tallymarks month
     for j in range(0, 12):
 
+        #conversion into 
         a = (14 - j + 1)/12
         y = year + 4800 - a
         m = j + 1 + 12*a - 3
@@ -78,8 +79,10 @@ for i in range(0, numYearsInt):
     vaporPressureMatrix.append(vaporPressureRow)
     
 
-solarDecline = 0.4093 *  np.sin((2 * np.pi * np.array(julianDayMatrix)/365) - 1405)
-sunAngle = np.arccos(-1 * np.tan(np.radians(solarDecline)))
+solarDecline = 0.4093 *  np.sin((2 * np.pi * np.array(julianDayMatrix)/365) - 1.405)
+sunAngle = np.arccos(-1 * np.tan(phi) * np.tan(np.deg2rad(solarDecline)))
+
+#Nt is the maximum number of daylight hours on day t
 Nt = (24*sunAngle)/np.pi
 
 #print(solarDecline)
@@ -94,9 +97,8 @@ for i in range(0, numYearsInt):
 
     for j in range(0, 12):
 
-        #calculate average evporation per day. Multiply by 
-
-        evaporation = 31*(2.1 * Nt[i][j]**2 * vaporPressureMatrix[i][j]) / (temperature[j] + 273.2)
+        #calculate average evporation per month. 
+        evaporation = daysInMonth[j]*(2.1 * Nt[i][j]**2 * vaporPressureMatrix[i][j]) / (temperature[j] + 273.2)
 
 
         evaporationRow.append(evaporation)
@@ -111,6 +113,8 @@ tEvaporationMatrix /= 304.8 #(ft/month)
 
 #sum the elements by column to get yearly evaporation
 tEvaporationMatrix = np.sum(tEvaporationMatrix, axis=0)
+
+
 
 #SCENARIO 1##########
 
@@ -135,15 +139,16 @@ xAxisYear = []
 yAxisWaterLevel = []
 yAxisSalinity = []
 
-#yAxisWaterLevel.append(waterLevel_i)
-#yAxisSalinity.append(salinity_i)
+xAxisYear.append(0)
+yAxisWaterLevel.append(waterLevel_i)
+yAxisSalinity.append(salinity_i)
 
-for i in range(0, numYearsInt):
+for i in range(1, numYearsInt + 1):
     #create x-axis
     xAxisYear.append(i)
 
     #(ft)      =     (ft)     -         (ft)            + (mi^3) /  mi^3      *     (ft)  
-    waterLevel = waterLevel_i - tEvaporationMatrix[i] + ((inflow/surfaceArea_i) * 5280) #ft
+    waterLevel = waterLevel_i - tEvaporationMatrix[i - 1] + ((inflow/surfaceArea_i) * 5280) #ft
 
     # find surface area at the new water level using the calculated trend equation:
     # f(x) = 7.9104x + 222.48 at residual of 0.9763
@@ -161,17 +166,30 @@ for i in range(0, numYearsInt):
     # update the next initial water level
     waterLevel_i = waterLevel
 
-    #mg/L    = mg * yr / mi^3
-    salinity = salinity_i + ((saltMassPerYear * (i + 1))/volume) #mg/L
+    #mg/L    =    mg/L    +  ((mg * yr /  * yr ) / ( mi^3   *  L/mi^3 )
+    salinity = salinity_i + ((saltMassPerYear * i)/ (volume * 4.168e+12) ) #mg/L
 
     yAxisWaterLevel.append(waterLevel)
     yAxisSalinity.append(salinity)
 
 
-#print(xAxisYear)
-#print(yAxisWaterLevel[0])
+print(xAxisYear)
+#print(yAxisWaterLevel)
+print(yAxisSalinity)
+
+fig = pl.figure()
+yAxis1 = fig.add_subplot(111)
+yAxis1.plot(xAxisYear, yAxisWaterLevel)
+yAxis1.set_ylabel('Elevation (ft)')
 
 
-pl.plot(xAxisYear, yAxisWaterLevel)
+yAxis2 = yAxis1.twinx()
+pl.ylabel('Salinity (mg/L)')
+
+yAxis2.plot(xAxisYear, yAxisSalinity, 'r-')
+
+pl.xlabel('Years from 2003')
+
+pl.title('Salton Sea Water Level')
+
 pl.show()
-#print(yAxisSalinity)
