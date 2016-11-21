@@ -137,65 +137,128 @@ volume = 15.93
 surfaceArea_i = 357.67 # initial surface area (mi^2)
 
 xAxisYear = []
+xAxisYear2 = []
 yAxisWaterLevel = []
 yAxisSalinity = []
+
+yAxisWaterLevel2 = []
+yAxisSalinity2 = []
 
 xAxisYear.append(0)
 yAxisWaterLevel.append(waterLevel_i)
 yAxisSalinity.append(salinity_i)
 
-for i in range(1, numYearsInt + 1):
-    #create x-axis
+yAxisWaterLevel2.append(waterLevel_i)
+yAxisSalinity2.append(salinity_i)
+
+
+# for i in range(1, numYearsInt + 1):
+#     #create x-axis
+#     xAxisYear.append(i)
+
+#     # find new level of water level with inflow factored in
+#     # f(x) = 2.8142x - 15.399 at residual of 0.9638
+#     #waterLevel_i = 2.8142 * (volume + 0.3943) - 282.44
+
+#     #(ft)      =     (ft)     -         (ft)            + (mi^3) /  mi^3      *     (ft)  
+#     waterLevel = waterLevel_i - tEvaporationMatrix[i - 1] + (inflow / surfaceArea_i * 5380) #ft
+
+#     # find surface area at the new water level using the calculated trend equation:
+#     # f(x) = 7.9104x + 222.48 at residual of 0.9763
+#     # (mi^2)    = 7.9104 *     ft     + 2224.83
+#     surfaceArea = 7.9104 * waterLevel + 2224.83
+
+#     surfaceArea_i = surfaceArea
+
+
+#     # find volume at the new water level using the calculated trend equation:
+#     # f(x) = 0.3425 x + 97.062 at residual of 0.9638
+#     # (mi^3) = 0.3425 * waterLevel + 97.062
+#     volume = 0.3425 * waterLevel + 97.062
+
+#     # update the next initial water level
+#     waterLevel_i = waterLevel
+
+#     #mg/L    =    mg/L    +  ((mg * yr /  * yr ) / ( mi^3   *  L/mi^3 )
+#     salinity = salinity_i + ((saltMassPerYear * i)/ (volume * 4.168e+12) ) #mg/L
+
+#     yAxisWaterLevel.append(waterLevel)
+#     yAxisSalinity.append(salinity)
+
+
+# print(xAxisYear)
+# #print(yAxisWaterLevel)
+# print(yAxisSalinity)
+
+# fig = pl.figure()
+# yAxis1 = fig.add_subplot(111)
+# yAxis1.plot(xAxisYear, yAxisWaterLevel)
+# yAxis1.set_ylabel('Elevation (ft)')
+
+
+# yAxis2 = yAxis1.twinx()
+# pl.ylabel('Salinity (mg/L)')
+
+# yAxis2.plot(xAxisYear, yAxisSalinity, 'r-')
+
+# pl.xlabel('Years from 2003')
+
+# pl.title('Salton Sea Water Level Elevation and Salinity (Scenario 1)')
+
+# pl.show()
+
+
+### SCENARIO 2 ###
+
+#In scenario 2 the inflow is at 0.2353 mi^3/yr
+#
+
+#Assume that total salinity of the inflow remains unchanged at 10343 mg/L
+waterLevel_i = -235
+saltMassPerYear2 = 1.014e+16 
+inflow2 = 0.2353
+for i in range(1, numYearsInt):
+    #x axis is already created
+    # xAxisYear
     xAxisYear.append(i)
 
-    # find new level of water level with inflow factored in
-    # f(x) = 2.8142x - 15.399 at residual of 0.9638
-    #waterLevel_i = 2.8142 * (volume + 0.3943) - 282.44
-
-    #(ft)      =     (ft)     -         (ft)            + (mi^3) /  mi^3      *     (ft)  
-    waterLevel = waterLevel_i - tEvaporationMatrix[i - 1] + (inflow / surfaceArea_i * 5380) #ft
-
-    # find surface area at the new water level using the calculated trend equation:
-    # f(x) = 7.9104x + 222.48 at residual of 0.9763
-    # (mi^2)    = 7.9104 *     ft     + 2224.83
-    surfaceArea = 7.9104 * waterLevel + 2224.83
-
-    surfaceArea_i = surfaceArea
+    if i >= 15:
+        inflow2 = 0.2122
+        #due to decreased amount of inflow, inflow of salt mass is recalculated
+        saltMassPerYear2 = 9.1474e+15
 
 
-    # find volume at the new water level using the calculated trend equation:
-    # f(x) = 0.3425 x + 97.062 at residual of 0.9638
-    # (mi^3) = 0.3425 * waterLevel + 97.062
-    volume = 0.3425 * waterLevel + 97.062
+    waterLevel2 = waterLevel_i - tEvaporationMatrix[i - 1] + (inflow2 / surfaceArea_i * 5380)
 
-    # update the next initial water level
-    waterLevel_i = waterLevel
+    surfaceArea2 = 7.91 * waterLevel2 + 2224.83 # mi^2
 
-    #mg/L    =    mg/L    +  ((mg * yr /  * yr ) / ( mi^3   *  L/mi^3 )
-    salinity = salinity_i + ((saltMassPerYear * i)/ (volume * 4.168e+12) ) #mg/L
+    surfaceArea_i = surfaceArea2
 
-    yAxisWaterLevel.append(waterLevel)
-    yAxisSalinity.append(salinity)
+    waterLevel_i = waterLevel2
+
+    yAxisWaterLevel2.append(waterLevel_i)
+
+    volume = 0.3425 * waterLevel2 + 97.062
+
+    salinity = salinity_i + ((saltMassPerYear2 * i) / (volume * 4.168e+12) )
+
+    yAxisSalinity2.append(salinity)
 
 
-print(xAxisYear)
-#print(yAxisWaterLevel)
-print(yAxisSalinity)
-
+print('x axis year', xAxisYear)
+print('y axis waterLevel2', yAxisWaterLevel2)
 fig = pl.figure()
 yAxis1 = fig.add_subplot(111)
-yAxis1.plot(xAxisYear, yAxisWaterLevel)
+yAxis1.plot(xAxisYear, yAxisWaterLevel2)
 yAxis1.set_ylabel('Elevation (ft)')
-
 
 yAxis2 = yAxis1.twinx()
 pl.ylabel('Salinity (mg/L)')
 
-yAxis2.plot(xAxisYear, yAxisSalinity, 'r-')
+yAxis2.plot(xAxisYear, yAxisSalinity2, 'r-')
 
 pl.xlabel('Years from 2003')
 
-pl.title('Salton Sea Water Level Elevation and Salinity')
+pl.title('Salton Sea Water Level Elevation and Salinity (Scenario 2)')
 
 pl.show()
-
