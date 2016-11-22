@@ -4,25 +4,6 @@ import matplotlib.pyplot as pl
 
 class SaltonSea:
 
-    year = 2003
-
-    latitude = np.deg2rad(33.3)
-
-    temperature = [
-        21.67, 24.44, 27.78,
-        31.67, 35.56, 40.56,
-        42.78, 41.67, 39.44,
-        33.33, 26.11, 21.67
-    ]
-
-    daysInMonth = [
-        31, 28, 31,
-        30, 31, 30,
-        31, 31, 30,
-        31, 30, 31
-    ]
-
-
     def __init__(self):
         print('Please enter the number of years from 2003 for proper projection: ', end="")
         numYearsInput = input()
@@ -33,7 +14,7 @@ class SaltonSea:
         self.evaporationMatrix = []
 
         self.year = 2003
-        self.latitude = 33.3
+        self.latitude = np.deg2rad(+33.3)
 
         self.temperature = [
             21.67, 24.44, 27.78,
@@ -49,7 +30,7 @@ class SaltonSea:
             31, 30, 31
         ]
 
-    def calculateEvaporation(self):
+    def calculateSunHours(self):
         for i in range(0, self.numYears):
 
             julianDayRow = []
@@ -84,10 +65,11 @@ class SaltonSea:
 
 
         #solar declination on day J
-        solarDeclination = 0.4093 * np.sin((2 * np.pi / 365) * np.array(self.julianDayMatrix) - 1.405)
+        solarDeclination = 0.4093 * np.sin((2 * np.pi / 365) * np.array(self.julianDayMatrix) - 1405)
 
         #Hargreave's Equation -> sunset hour angle [radians]
-        sunsetHourAngle = np.arccos(-1 * np.tan(self.latitude) * np.tan(solarDeclination))
+        #sunsetHourAngle = np.arccos(-1 * np.tan(np.rad2deg(self.latitude)) * np.tan(solarDeclination))
+        sunsetHourAngle = np.arccos(-np.tan(self.latitude) * np.tan(solarDeclination))
 
         #Nt is the maximum number of daylight hours on day t
         Nt = (24*sunsetHourAngle)/np.pi
@@ -96,6 +78,33 @@ class SaltonSea:
         print('Sunset Hour Angle', sunsetHourAngle)
         print('Maximum Number of Daylight Hours', Nt)
 
+        for i in range(0, self.numYears):
+            evaporationRow = []
+            for j in range(0, 12):
+
+                #calculate average evporation per month. 
+                evaporation = self.daysInMonth[j]*(2.1 * Nt[i][j]**2 * self.vaporPressureMatrix[i][j]) / (self.temperature[j] + 273.2)
+
+
+                evaporationRow.append(evaporation)
+
+            self.evaporationMatrix.append(evaporationRow)
+
+
+        #print(evaporationMatrix)
+        tEvaporationMatrix = np.transpose(self.evaporationMatrix) #(mm/month)
+
+        tEvaporationMatrix /= 304.8 #(ft/month)
+
+        #sum the elements by column to get yearly evaporation
+        tEvaporationMatrix = np.sum(tEvaporationMatrix, axis=0)
+
+        print(tEvaporationMatrix)
+
+
+
+
+
 
 ss = SaltonSea()
-ss.calculateEvaporation()
+ss.calculateSunHours()
