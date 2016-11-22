@@ -5,6 +5,7 @@ import matplotlib.pyplot as pl
 class SaltonSea:
 
     def __init__(self):
+
         print('Please enter the number of years from 2003 for proper projection: ', end="")
 
         numYearsInput = input()
@@ -22,12 +23,16 @@ class SaltonSea:
             33.33, 26.11, 21.67
         ]
 
+        #days in each month
         self.daysInMonth = [
             31, 28, 31,
             30, 31, 30,
             31, 31, 30,
             31, 30, 31
         ]
+
+        #initial water level at elevation compared to the sea level
+        self.waterLevel = -235 #(ft)
 
     def calculateEvaporation(self):
         for i in range(0, self.numYears):
@@ -78,11 +83,92 @@ class SaltonSea:
             print(self.evaporationMatrix)
 
 class Scenario(SaltonSea):
-    def __init__(self, SaltonSea):
+
+    def __init__(self, SaltonSea, inflow, salinity_i):
         print(SaltonSea.evaporationMatrix)
+
+        print(SaltonSea.year)
+
+        self.inflow = inflow # (mi^3/yr)
+        self.salinity_i = salinity_i # (mg/L) 
+
+        self.xAxisYear = []
+        self.xAxisYear.append(0)
+
+        self.yAxisWaterLevel = []
+        self.yAxisWaterLevel.append(SaltonSea.waterLevel)
+
+        self.yAxisSalinity = []
+        self.yAxisSalinity.append(self.salinity_i)
+
+        for i in range(1, SaltonSea.numYears + 1):
+            self.xAxisYear.append(i)
+
+            """
+            Find new level of water level with inflow factored in
+            f(x) = 2.8142x - 15.399 at residual of 0.9638
+            waterLevel_i = 2.8142 * (volume + 0.3943) - 282.44
+            """
+
+            #(ft)      =     (ft)     -         (ft)            + (mi^3) /  mi^3      *     (ft)  
+            waterLevel = waterLevel_i - tEvaporationMatrix[i - 1] + (inflow / surfaceArea_i * 5380) #ft
+
+
+            """
+            Find surface area at the new water level using the calculated trend equation:
+            f(x) = 7.9104x + 222.48 at residual of 0.9763
+            """
+
+            #(mi^2)     = 7.9104 *     ft     + 2224.83
+            surfaceArea = 7.9104 * waterLevel + 2224.83
+
+            surfaceArea_i = surfaceArea
+
+            """
+            Find volume at the new water level using the calculated trend equation:
+            f(x) = 0.3425 x + 97.062 at residual of 0.9638
+            """
+
+            #(mi^3)= 0.3425 * waterLevel + 97.062
+            volume = 0.3425 * waterLevel + 97.062
+
+            # update the next initial water level
+            waterLevel_i = waterLevel
+
+            #mg/L    =    mg/L    +  ((mg * yr /  * yr ) / ( mi^3   *  L/mi^3 )
+            salinity = salinity_i + ((saltMassPerYear * i)/ (volume * 4.168e+12) ) #mg/L
+
+            yAxisWaterLevel.append(waterLevel)
+            yAxisSalinity.append(salinity)
+
+
+    def plot():
+        #print(xAxisYear)
+        #print(yAxisWaterLevel)
+        #print(yAxisSalinity)
+
+        fig = pl.figure()
+        yAxis1 = fig.add_subplot(111)
+        yAxis1.plot(xAxisYear, yAxisWaterLevel)
+        yAxis1.set_ylabel('Elevation (ft)')
+
+
+        yAxis2 = yAxis1.twinx()
+        pl.ylabel('Salinity (mg/L)')
+
+        yAxis2.plot(xAxisYear, yAxisSalinity, 'r-')
+
+        pl.xlabel('Years from 2003')
+
+        pl.title('Salton Sea Water Level Elevation and Salinity (Scenario 1)')
+
+        pl.show()
+
+
+
 
 
 ss = SaltonSea()
 ss.calculateEvaporation()
 
-scenario1 = Scenario(ss)
+scenario1 = Scenario(ss, 0.3943, 44000)
