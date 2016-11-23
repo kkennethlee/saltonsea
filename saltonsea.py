@@ -56,13 +56,14 @@ for i in range(0, numYearsInt):
         y = year + i + 4800 - a
         m = j + 1 + 12*a - 3
 
-        JDN = 1 + (153*m + 2)/5 + 265*y + y/4 - y/100 + y/400 -32045
+        JDN = 1 + (153*m + 2)/5 + 365*y + y/4 - y/100 + y/400 -32045
         JD = JDN + (12 - 12)/24 + 0/1440 + 0/86400
 
         # if j == 11:
         #     year += 1
 
-
+        #print ('JD', JD)
+        
         #julian day row
         julianDayRow.append(JD)
         
@@ -71,6 +72,8 @@ for i in range(0, numYearsInt):
         #es, a function of temperature, is saturated vapor pressure in air at certain temperature
         es = 0.6108 * np.exp((17.27 * temperature[j]) / (237.3 + temperature[j]))
         
+        #print('es', es)
+
         #vapor pressure row
         vaporPressureRow.append(es)
         
@@ -79,15 +82,20 @@ for i in range(0, numYearsInt):
     vaporPressureMatrix.append(vaporPressureRow)
     
 
-solarDecline = 0.4093 *  np.sin((2 * np.pi * np.array(julianDayMatrix)/365) - 1.405)
-sunAngle = np.arccos(-1 * np.tan(phi) * np.tan(np.deg2rad(solarDecline)))
+solarDecline = 0.4093 *  np.sin((2 * np.pi * np.array(julianDayMatrix)/365) - 1405)
+
+#print('solar decline', solarDecline)
+
+sunAngle = np.arccos(-1 * np.tan(np.deg2rad(phi)) * np.tan(solarDecline))
+
+print('sun angle', sunAngle)
 
 #Nt is the maximum number of daylight hours on day t
 Nt = (24*sunAngle)/np.pi
 
-#print(solarDecline)
-#print(sunAngle)
-#print(Nt)
+print(solarDecline)
+print(sunAngle)
+print(Nt)
 
 #reset year to 2003
 year = 2003
@@ -114,6 +122,7 @@ tEvaporationMatrix /= 304.8 #(ft/month)
 #sum the elements by column to get yearly evaporation
 tEvaporationMatrix = np.sum(tEvaporationMatrix, axis=0)
 
+print ("evaporation matrix", tEvaporationMatrix)
 
 
 #SCENARIO 1##########

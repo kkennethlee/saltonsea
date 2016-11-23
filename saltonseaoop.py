@@ -14,7 +14,7 @@ class SaltonSea:
         self.evaporationMatrix = []
 
         self.year = 2003
-        self.latitude = np.deg2rad(+33.3)
+        self.latitude = np.deg2rad(33.3)
 
         self.temperature = [
             21.67, 24.44, 27.78,
@@ -57,10 +57,16 @@ class SaltonSea:
                 JDN = 1 + (153*m + 2)/5 + 365*y + y/4 - y/100 + y/400 -32045
                 JD = JDN + (12 - 12)/24 + 0/1440 + 0/86400
 
-                solarDeclination = 0.4093 * np.sin((2 * np.pi / 365) * JD - 1405)
+                #print ('JD', JD)
+
+                solarDeclination = 0.4093 * np.sin((2 * np.pi  * JD / 365) - 1405)
+
+                #print('solar decline', solarDeclination)
 
                 #Hargreave's Equation -> sunset hour angle [radians]
-                sunsetHourAngle = np.arccos(-np.tan(self.latitude) * np.tan(solarDeclination))
+                sunsetHourAngle = np.arccos(-1 *np.tan(self.latitude) * np.tan(solarDeclination))
+
+                print('sun angle', sunsetHourAngle)
 
                 #Nt is the maximum number of daylight hours on day t
                 Nt = (24*sunsetHourAngle)/np.pi
@@ -69,6 +75,8 @@ class SaltonSea:
                 #Penman's Equation.
                 #vapor pressure (es), is a function of temperature
                 es = 0.6108 * np.exp((17.27 * self.temperature[j]) / (237.3 + self.temperature[j]))
+
+                #print('es', es)
 
                 evaporation = self.daysInMonth[j]*(2.1 * Nt**2 * es) / (self.temperature[j] + 273.2)
 
