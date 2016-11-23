@@ -50,7 +50,7 @@ class SaltonSea:
             
                 #value of 'a' needs to be integer. value 1 for Jan, Feb. value 0 for Mar to Dec
                 a = np.floor((14 - j + 1) / 12)
-                y = self.year + j + 4800 - a
+                y = self.year + i + 4800 - a
                 m = j + 1 + 12*a - 3
 
                 #calculates julian day of the first day of each month
@@ -83,17 +83,21 @@ class SaltonSea:
         #sum the elements by column to get yearly evaporation
         self.evaporationMatrix = np.sum(self.evaporationMatrix, axis=0)
 
-        print(self.evaporationMatrix)
+        print("evaporation matrix", self.evaporationMatrix)
+
+
 
 class Scenario(SaltonSea):
 
-    def __init__(self, SaltonSea, inflow, salinity_i):
-        print(SaltonSea.evaporationMatrix)
-
-        print(SaltonSea.year)
+    def __init__(self, SaltonSea, inflow):
 
         self.inflow = inflow # (mi^3/yr)
-        self.salinity_i = salinity_i # (mg/L) 
+        self.lakeSalinity = 44000# (mg/L)
+
+        """
+               mg / yr           mi^3/yr  *   L / mi^3  *    mg / L
+        """
+        self.saltMassPerYear = self.inflow * 2.39913e+13 * self.lakeSalinity
         
         self.waterLevel_i = SaltonSea.waterLevel
         self.surfaceArea_i = SaltonSea.surfaceArea
@@ -105,7 +109,7 @@ class Scenario(SaltonSea):
         self.yAxisWaterLevel.append(SaltonSea.waterLevel)
 
         self.yAxisSalinity = []
-        self.yAxisSalinity.append(self.salinity_i)
+        self.yAxisSalinity.append(self.lakeSalinity)
 
         for i in range(1, SaltonSea.numYears + 1):
             self.xAxisYear.append(i)
@@ -140,27 +144,29 @@ class Scenario(SaltonSea):
             self.waterLevel_i = waterLevel
 
             #mg/L    =    mg/L    +  ((mg * yr /  * yr ) / ( mi^3   *  L/mi^3 )
-            salinity = self.salinity_i + ((saltMassPerYear * i)/ (volume * 4.168e+12) ) #mg/L
+            salinity = self.lakeSalinity + ((self.saltMassPerYear * i)/ (volume * 4.168e+12) ) #mg/L
 
-            yAxisWaterLevel.append(waterLevel)
-            yAxisSalinity.append(salinity)
+            self.yAxisWaterLevel.append(waterLevel)
+            self.yAxisSalinity.append(salinity)
 
+    def changeFlowRate(self, flowRate):
+        self.inflow = flowRate
 
-    def plot():
+    def plotChart(self):
         #print(xAxisYear)
         #print(yAxisWaterLevel)
         #print(yAxisSalinity)
 
         fig = pl.figure()
         yAxis1 = fig.add_subplot(111)
-        yAxis1.plot(xAxisYear, yAxisWaterLevel)
+        yAxis1.plot(self.xAxisYear, self.yAxisWaterLevel)
         yAxis1.set_ylabel('Elevation (ft)')
 
 
         yAxis2 = yAxis1.twinx()
         pl.ylabel('Salinity (mg/L)')
 
-        yAxis2.plot(xAxisYear, yAxisSalinity, 'r-')
+        yAxis2.plot(self.xAxisYear, self.yAxisSalinity, 'r-')
 
         pl.xlabel('Years from 2003')
 
@@ -175,6 +181,6 @@ class Scenario(SaltonSea):
 ss = SaltonSea()
 ss.calculateEvaporation()
 
-scenario1 = Scenario(ss, 0.3943, 44000)
+scenario1 = Scenario(ss, 0.3943)
 
-scenario1.plot()
+scenario1.plotChart()
