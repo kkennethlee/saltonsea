@@ -51,22 +51,16 @@ for i in range(0, numYearsInt):
     #tallymarks month
     for j in range(0, 12):
 
-
-        #Below calculates for julian day of first day of every month
-        #http://www.cs.utsa.edu/~cs1063/projects/Spring2011/Project1/jdn-explanation.html
-        
-        #value of 'a' needs to be integer. value 1 for Jan, Feb. value 0 for Mar to Dec
-
+        #conversion into 
         a = np.floor((14 - j + 1)/12)
-        y = year + 4800 - a
+        y = year + i + 4800 - a
         m = j + 1 + 12*a - 3
 
-        #1 because first day of each month
-        JDN = 1 + (153*m + 2)/5 + 365*y + y/4 - y/100 + y/400 -32045
+        JDN = 1 + (153*m + 2)/5 + 265*y + y/4 - y/100 + y/400 -32045
         JD = JDN + (12 - 12)/24 + 0/1440 + 0/86400
 
-        if j == 11:
-            year += 1
+        # if j == 11:
+        #     year += 1
 
 
         #julian day row
@@ -84,17 +78,15 @@ for i in range(0, numYearsInt):
     julianDayMatrix.append(julianDayRow)
     vaporPressureMatrix.append(vaporPressureRow)
     
-#solar declination on day J
-solarDeclination = 0.4093 *  np.sin((2 * np.pi * np.array(julianDayMatrix)/365) - 1.405)
 
-
-sunsetHourAngle = np.arccos(-1 * np.tan(np.deg2rad(phi)) * np.tan(solarDeclination))
+solarDecline = 0.4093 *  np.sin((2 * np.pi * np.array(julianDayMatrix)/365) - 1.405)
+sunAngle = np.arccos(-1 * np.tan(phi) * np.tan(np.deg2rad(solarDecline)))
 
 #Nt is the maximum number of daylight hours on day t
-Nt = (24*sunsetHourAngle)/np.pi
+Nt = (24*sunAngle)/np.pi
 
-#print(solarDeclination)
-#print(sunsetHourAngle)
+#print(solarDecline)
+#print(sunAngle)
 #print(Nt)
 
 #reset year to 2003
@@ -122,7 +114,7 @@ tEvaporationMatrix /= 304.8 #(ft/month)
 #sum the elements by column to get yearly evaporation
 tEvaporationMatrix = np.sum(tEvaporationMatrix, axis=0)
 
-print(tEvaporationMatrix)
+
 
 #SCENARIO 1##########
 
@@ -145,22 +137,12 @@ volume = 15.93
 surfaceArea_i = 357.67 # initial surface area (mi^2)
 
 xAxisYear = []
-xAxisYear2 = []
 yAxisWaterLevel = []
 yAxisSalinity = []
-
-
-yAxisWaterLevel2 = []
-yAxisSalinity2 = []
-
 
 xAxisYear.append(0)
 yAxisWaterLevel.append(waterLevel_i)
 yAxisSalinity.append(salinity_i)
-
-yAxisWaterLevel2.append(waterLevel_i)
-yAxisSalinity2.append(salinity_i)
-
 
 for i in range(1, numYearsInt + 1):
     #create x-axis
@@ -213,15 +195,7 @@ yAxis2.plot(xAxisYear, yAxisSalinity, 'r-')
 
 pl.xlabel('Years from 2003')
 
-pl.title('Salton Sea Water Level Elevation and Salinity (Scenario 1)')
+pl.title('Salton Sea Water Level Elevation and Salinity')
 
 pl.show()
 
-
-### SCENARIO 2 ###
-
-#In scenario 2 the inflow is at 0.2353 mi^3/yr
-#
-
-#Assume that total salinity of the inflow remains unchanged at 10343 mg/L
-# 
