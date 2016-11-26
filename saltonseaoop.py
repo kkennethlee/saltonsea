@@ -16,6 +16,7 @@ class SaltonSea:
         self.year = 2003
         self.latitude = np.deg2rad(33.3)
 
+        #celsius
         self.temperature = [
             21.67, 24.44, 27.78,
             31.67, 35.56, 40.56,
@@ -31,8 +32,15 @@ class SaltonSea:
             31, 30, 31
         ]
 
+        #average annual precipitation
+        #http://www.areavibes.com/salton+sea+beach-ca/weather/
+        self.precipitation = 4.3/12 #(ft)
+
         #initial water level at elevation compared to the sea level
         self.waterLevel = -235 #(ft)
+
+        #initial lake volume
+        self.volume = 15.93 #(mi^3)
 
         #initial surface area of the lake at initial water level of -235 ft
         self.surfaceArea = 7.9104 * self.waterLevel + 2224.83
@@ -61,8 +69,6 @@ class SaltonSea:
 
                 solarDeclination = 0.4093 * np.sin((2 * np.pi  * JD / 365) - 1405)
 
-                #print('solar decline', solarDeclination)
-
                 #Hargreave's Equation -> sunset hour angle [radians]
                 sunsetHourAngle = np.arccos(-1 *np.tan(self.latitude) * np.tan(solarDeclination))
 
@@ -78,7 +84,8 @@ class SaltonSea:
 
                 #print('es', es)
 
-                evaporation = self.daysInMonth[j]*(2.1 * Nt**2 * es) / (self.temperature[j] + 273.2)
+
+                evaporation = self.daysInMonth[j]*(2.1 * Nt**2 * es) / (self.temperature[j] + 273.2) #mm/day
 
                 evaporationRow.append(evaporation)
 
@@ -99,22 +106,30 @@ class Scenario(SaltonSea):
 
     def __init__(self, SaltonSea, inflow):
 
-        self.inflow = inflow # (mi^3/yr)
-        self.lakeSalinity = 44000# (mg/L)
+        self.inflow = inflow #(mi^3/yr)
+        self.inflowSalinity = 10343 #mg/L
+        """
+               mg / yr            mi^3/yr  *   L / mi^3  *    mg / L
+        """
+        self.saltMassPerYear = self.inflow * 2.39913e+13 * self.inflowSalinity
 
+        self.lakeSalinity = 44000 #(mg/L)
+        self.volume = SaltonSea.volume # mi^3
         """
-               mg / yr           mi^3/yr  *   L / mi^3  *    mg / L
+                   mg             mi^3  *   L / mi^3  *    mg / L
         """
-        self.saltMassPerYear = self.inflow * 2.39913e+13 * self.lakeSalinity
-        
-        self.waterLevel_i = SaltonSea.waterLevel
-        self.surfaceArea_i = SaltonSea.surfaceArea
+        self.saltMassLake = self.volume * 2.39913e+13 * self.lakeSalinity
+
+
+
+        self.waterLevel_i = SaltonSea.waterLevel # ft
+        self.surfaceArea_i = SaltonSea.surfaceArea # mi^2
 
         self.xAxisYear = []
         self.xAxisYear.append(0)
 
         self.yAxisWaterLevel = []
-        self.yAxisWaterLevel.append(SaltonSea.waterLevel)
+        self.yAxisWaterLevel.append(self.waterLevel_i)
 
         self.yAxisSalinity = []
         self.yAxisSalinity.append(self.lakeSalinity)
@@ -122,40 +137,35 @@ class Scenario(SaltonSea):
         for i in range(1, SaltonSea.numYears + 1):
             self.xAxisYear.append(i)
 
+            #if the water volume of lake is less than 0, then there is nothing left for evaporation
+            if self.volume < 0:
+                SaltonSea.evaporationMatrix[i - 1] = 0
+                self.volume = 0
+
+            #inflow adds to the volume
+            self.volume += self.inflow
+
+
             """
             Find new level of water level with inflow factored in
-            f(x) = 2.8142x - 15.399 at residual of 0.9638
-            waterLevel_i = 2.8142 * (volume + 0.3943) - 282.44
+            f(x) = 2.8142x - 282.44 at residual of 0.9638
             """
-
-            #(ft)      =     (ft)     -         (ft)            + (mi^3) /  mi^3      *     (ft)  
-            waterLevel = self.waterLevel_i - SaltonSea.evaporationMatrix[i - 1] + (inflow / self.surfaceArea_i * 5380) #ft
-
-
-            """
-            Find surface area at the new water level using the calculated trend equation:
-            f(x) = 7.9104x + 222.48 at residual of 0.9763
-            """
-
-            #(mi^2)     = 7.9104 *     ft     + 2224.83
-            surfaceArea = 7.9104 * waterLevel + 2224.83
-
-            self.surfaceArea_i = surfaceArea
+            waterLevel = 2.8142 * self.volume - 282.44 - SaltonSea.evaporationMatrix[i - 1] + SaltonSea.precipitation
 
             """
             Find volume at the new water level using the calculated trend equation:
             f(x) = 0.3425 x + 97.062 at residual of 0.9638
             """
-            volume = 0.3425 * waterLevel + 97.062
+            self.volume = 0.3425 * waterLevel + 97.062
 
             # update the next initial water level
-            self.waterLevel_i = waterLevel
+            #self.waterLevel_i = waterLevel
 
             #mg/L    =    mg/L    +  ((mg * yr /  * yr ) / ( mi^3   *  L/mi^3 )
-            salinity = self.lakeSalinity + ((self.saltMassPerYear * i)/ (volume * 4.168e+12) ) #mg/L
+            self.lakeSalinity = (self.saltMassLake + self.saltMassPerYear * i)/ (self.volume * 4.168e+12) #mg/L
 
             self.yAxisWaterLevel.append(waterLevel)
-            self.yAxisSalinity.append(salinity)
+            self.yAxisSalinity.append(self.lakeSalinity)
 
     def changeFlowRate(self, flowRate):
         self.inflow = flowRate
