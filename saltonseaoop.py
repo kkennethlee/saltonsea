@@ -1,15 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as pl
-from matplotlib.patches import Polygon, RegularPolygon
+from matplotlib.patches import Polygon
 
 class SaltonSea:
 
     def __init__(self):
-
-        print('Please enter the number of years from 2003 for proper projection: ', end="")
-
-        numYearsInput = input()
-        self.numYears = int(numYearsInput)
 
         self.evaporationMatrix = []
 
@@ -178,9 +173,6 @@ class SaltonSea:
         ax.add_patch(Polygon(a1, fill=False))
 
 
-
-
-
         pl.show()
 
     def parseCoordinates(self, x, y):
@@ -293,13 +285,41 @@ class Scenario(SaltonSea):
         pl.show()
 
 
+def main():
+    ss = SaltonSea()
+
+    while True:
+        try:
+            print('Please enter the number of years from 2003 for proper projection: ', end="")
+            ss.numYears = int(input())
+            ss.calculateEvaporation()
+            break
+        except ValueError:
+            print("That is not a valid number. Please try again\n")
+
+    while True:
+        try:
+            print('\n1. Contour Map')
+            print('2. Scenario 1')
+            print('3. Scenario 2')
+            print('Please select the following (1 - 3): ', end="")
+            option = int(input())
+            if(option >= 1 and option <= 3):
+                if(option == 1):
+                    ss.contourMap()
+                if(option == 2):
+                    scenario1 = Scenario(ss, 0.3943)
+                    scenario1.plotChart()
+                if(option == 3):
+                    print('3 is pressed')
+                break
+        except ValueError:
+            print("That is not a valid option. Please try again.")
+
+
+if __name__ == "__main__":
+    main()
 
 
 
-ss = SaltonSea()
-ss.calculateEvaporation()
-ss.contourMap()
 
-#scenario1 = Scenario(ss, 0.3943)
-
-#scenario1.plotChart()
