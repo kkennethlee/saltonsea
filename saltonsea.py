@@ -193,7 +193,7 @@ class SaltonSea:
 
 class Scenario(SaltonSea):
 
-    def __init__(self, SaltonSea, inflow, **kwargs):
+    def __init__(self, SaltonSea, title, inflow, **kwargs):
 
 
         while True:
@@ -204,6 +204,8 @@ class Scenario(SaltonSea):
                 break
             except ValueError:
                 print("That is not a valid number. Please try again\n")
+
+        self.title = title
 
 
         self.inflow = inflow #(mi^3/yr)
@@ -294,7 +296,7 @@ class Scenario(SaltonSea):
 
         pl.xlabel('Years from 2003')
 
-        pl.title('Salton Sea Water Level Elevation and Salinity (Scenario 1)')
+        pl.title('Salton Sea Water Level Elevation and Salinity ('+ self.title +')')
 
         pl.show()
 
@@ -313,10 +315,10 @@ def main():
                 if(option == 1):
                     ss.contourMap()
                 if(option == 2):
-                    scenario1 = Scenario(ss, 0.3943)
+                    scenario1 = Scenario(ss, "Scenario 1", 0.3943)
                     scenario1.plotChart()
                 if(option == 3):
-                    scenario2 = Scenario(ss, 0.2353, newInflowYear = 15, newInflowRate = 0.2122)
+                    scenario2 = Scenario(ss, "Scenario 2", 0.2353, newInflowYear = 15, newInflowRate = 0.2122)
                     scenario2.plotChart()
                 break
         except ValueError:
