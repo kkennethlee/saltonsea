@@ -12,6 +12,7 @@ class SaltonSea:
         self.latitude = np.deg2rad(33.3)
 
         #average monthly temperature (celsius)
+        #https://weather.com/weather/monthly/l/Salton+City+CA+92275:4:US
         self.temperature = [
             21.67, 24.44, 27.78,
             31.67, 35.56, 40.56,
@@ -248,7 +249,6 @@ class Scenario(SaltonSea):
             #if there are optional parameters, do the following:
             
             if kwargs: #type dictionary
-                #print(kwargs['newInflowYear'])
                 if i == int(kwargs['newInflowYear']):
                     self.changeFlowRate(float(kwargs['newInflowRate']))
 
