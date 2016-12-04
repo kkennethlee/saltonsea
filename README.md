@@ -20,3 +20,38 @@ I first started learning Python through my job. After playing with its interacti
 Transitioning from Matlab to Python allows means for my Salton Sea to be more readily available. Thanks to Python (and its Matplotlib and Numpy library), my Salton Sea project lives again once more after years of being locked away in a proprietary file for a program with expired license.
 
 After refamiliarizing with the logic of this programming, I have rewritten the code for efficiency and calibrated the calculation to project what I believe to be more accurate.
+
+### (Brief) Summary of Process
+
+The initial water level was recorded at -235 ft in year 2003. To find the lake volume in year 2003, the surface area of [each contour level](http://cdn.calisphere.org/data/13030/qs/kt5f59n7qs/figures/caljsiol_sio1ca175_113_073.gif) was first calculated using the [Simpsons Rule](http://mathworld.wolfram.com/SimpsonsRule.html). Knowing the depth of the lake at each surface area that is calculated, initial volume of water was estimated.
+
+Trending Equation below was formed to establish relationship between the lake's water level and the remaining lake volume.
+```
+Water Level = 0.0728 * Lake Volume^2 + 1.4607 * Lake Volume - 282.44
+    Regression of 0.9738, 1 being 100% accurate
+```
+```
+Lake Volume = 0.3425 * water level + 97.062
+    Regression of 0.96, 1 being 100% accurate
+```
+
+**Evaporation** is the only means of outflow for the Salton Sea. Thus, evaporation rate was carefuly calculated using the following information
+
+* Latitude of Salton Sea: 33 degrees North
+* Calculate [Julian Day](http://www.cs.utsa.edu/~cs1063/projects/Spring2011/Project1/jdn-explanation.html) from Gregorian Day
+* The Following [Equations](http://nest.su.se/mnode/Methods/penman.htm) Below:
+    * Penman's Equation which factors in average monthly temperature to calculate vapor pressure. (Note: This project assumes that the temperature will stay constant throughout the years and does not take climate change into a factor)
+    * Hargreaves Equation to calculate Sunset Hour Angle 
+    * Hamon's Equation to calculate daily evaporation rate
+
+After yearly evaporation rate is calculated, water balance is formed below:
+
+```
+Lake Volume = inflow + precipitation - evaporation + initial lake volume
+```
+
+With Lake Volume calculated, Salinity Level is calculated:
+```
+Lake Salinity = (Mass of Lake Salt + Mass of Inflow Salt) / Lake Volume
+```
+
