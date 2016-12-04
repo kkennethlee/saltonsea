@@ -11,7 +11,7 @@ class SaltonSea:
         self.year = 2003
         self.latitude = np.deg2rad(33.3)
 
-        #average monthly temperature (celsius)
+        #Average of average high and average low temperatures (celsius)
         #https://weather.com/weather/monthly/l/Salton+City+CA+92275:4:US
 
         self.temperature = [
@@ -266,8 +266,8 @@ class Scenario(SaltonSea):
             Find new level of water level with inflow factored in
             f(x) = 2.8142x - 282.44 at residual of 0.9638
             """
-            #waterLevel = 2.8142 * self.volume - 282.44 - SaltonSea.evaporationMatrix[i - 1] + SaltonSea.precipitation
-            waterLevel = (0.0728 * self.volume**2) + (1.4607 * self.volume) - 277.9 - SaltonSea.evaporationMatrix[i - 1] + SaltonSea.precipitation
+            waterLevel = 2.8142 * self.volume - 282.44 - SaltonSea.evaporationMatrix[i - 1] + SaltonSea.precipitation
+            #waterLevel = (0.0728 * self.volume**2) + (1.4607 * self.volume) - 277.9 - SaltonSea.evaporationMatrix[i - 1] + SaltonSea.precipitation
 
             """
             Find volume at the new water level using the calculated trend equation:
