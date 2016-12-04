@@ -13,11 +13,12 @@ class SaltonSea:
 
         #average monthly temperature (celsius)
         #https://weather.com/weather/monthly/l/Salton+City+CA+92275:4:US
+
         self.temperature = [
-            21.67, 24.44, 27.78,
-            31.67, 35.56, 40.56,
-            42.78, 41.67, 39.44,
-            33.33, 26.11, 21.67
+            13.33, 15.56, 18.89,
+            22.5, 26.67, 30.56,
+            33.33, 33.06, 30,
+            24.17, 17.22, 12.78
         ]
 
         #days in each month
@@ -60,8 +61,6 @@ class SaltonSea:
                 #calculates julian day of the first day of each month
                 JDN = 1 + (153*m + 2)/5 + 365*y + y/4 - y/100 + y/400 -32045
                 JD = JDN + (12 - 12)/24 + 0/1440 + 0/86400
-
-                #print ('JD', JD)
 
                 solarDeclination = 0.4093 * np.sin((2 * np.pi  * JD / 365) - 1405)
 
@@ -267,7 +266,8 @@ class Scenario(SaltonSea):
             Find new level of water level with inflow factored in
             f(x) = 2.8142x - 282.44 at residual of 0.9638
             """
-            waterLevel = 2.8142 * self.volume - 282.44 - SaltonSea.evaporationMatrix[i - 1] + SaltonSea.precipitation
+            #waterLevel = 2.8142 * self.volume - 282.44 - SaltonSea.evaporationMatrix[i - 1] + SaltonSea.precipitation
+            waterLevel = (0.0728 * self.volume**2) + (1.4607 * self.volume) - 277.9 - SaltonSea.evaporationMatrix[i - 1] + SaltonSea.precipitation
 
             """
             Find volume at the new water level using the calculated trend equation:
