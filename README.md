@@ -17,6 +17,6 @@ User inputs the number of years from 2003. The project will then give a yearly p
 ### Background Story
 I first started learning Python through my job. After playing with its interactive shell, I couldn’t help but think how similar its functions were to that of Matlab. Without a second thought, I decided to revive my Salton Sea Projection code I have written few years back.
 
-Transitioning from Matlab to Python allows means for my Salton Sea to be more readily available. Thaanks to Python (and its Matplotlib and Numpy library), my Salton Sea project lives again once more after years of being locked away in a proprietary file for a program with expired license.
+Transitioning from Matlab to Python allows means for my Salton Sea to be more readily available. Thanks to Python (and its Matplotlib and Numpy library), my Salton Sea project lives again once more after years of being locked away in a proprietary file for a program with expired license.
 
 After refamiliarizing with the logic of this programming, I have rewritten the code for efficiency and calibrated the calculation to project what I believe to be more accurate.
